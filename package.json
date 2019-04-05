@@ -1,0 +1,25 @@
+{
+  "name": "Abaziaba",
+  "version": "1.0.0",
+  "description": "CLI based storefront homework activity",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JBloodBeardN/Abaziaba.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JBloodBeardN/Abaziaba/issues"
+  },
+  "homepage": "https://github.com/JBloodBeardN/Abaziaba#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^6.2.2",
+    "mysql": "^2.16.0"
+  }
+}
