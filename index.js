@@ -12,7 +12,6 @@ var connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-    console.log("Connected as: " + connection.threadId);
     displayCatalog();
 })
 //   //display all items from database products table (in table(id/name/price/qty) >> using console.table npm package)
@@ -23,7 +22,6 @@ function displayCatalog() {
     connection.query("SELECT * FROM products", function (err, data) {
         if (err) throw err;
         var newTable = consoleTable.getTable(data);
-        console.log(data);
         console.log(newTable);
         // console.log(data.length);
         checkout(data.length, data);
@@ -40,7 +38,7 @@ function displayCatalog() {
 function checkout(maxValue, tableObject) {
     var price = 0;
     var stockQuantity = 0;
-    var productName = "";
+    var selectedProduct;
     //    // prompt "Which item would you like to buy"
     //    // prompt "How many would you like"
     // //question? [Type ‘Q’ to Quit]. << not in instructions, but how does //program end if we recall wouldYouLikeToBuy()
@@ -67,31 +65,46 @@ function checkout(maxValue, tableObject) {
                 validate: function (value) {
                     // //read value of selection based on number input used as index of the array passed to console.table (array[response.itemSelected].itemId)
                     tableObject.forEach(function (element, index) {
-                        // if (element.uid == answer.productSelect) {
-                        //     stockQuantity = parseInt(element.stockQuantity);
-                        //     price = parseFloat(element.price);
-                        // };
-                        if (value > stockQuantity) {
-                            console.log("Insufficient Stock Quantity.");
-                            return false;
-                        } else {
-                            return true;
+                        if (element.itemId == answer.productSelect) {
+                            selectedProduct = element;
+                            stockQuantity = parseInt(element.stockQuantity);
+                            price = parseFloat(element.price);
                         };
                     })
+                    if (value > stockQuantity) {
+                        console.log(`
+                        Insufficient Stock Quantity.`);
+                        return false;
+                    } else {
+                        return true;
+                    };
+
                 }
             }
         ]).then(function (answer) {
             const quantityToPurchase = parseInt(answer.quantityToPurchase);
             const newQuantity = stockQuantity - quantityToPurchase;
-            const selectedProduct = tableObject[answer.productSelect].uid;
             const cost = quantityToPurchase * price;
-            connection.query("UPDATE products SET stockquantity = ? WHERE uid = ?", [newQuantity, selectedProduct], function (err, data) {
+            connection.query("UPDATE products SET stockquantity = ? WHERE itemId = ?", [newQuantity, selectedProduct.itemId], function (err, data) {
                 if (err) throw err;
                 console.log(
-                    `You Purchased ${quantityToPurchase} ${productName}s
-                    Your purchase cost ${cost}.
+                    `You Purchased ${quantityToPurchase} ${selectedProduct.productName}
+Your purchase cost ${cost}.
                     `);
-                displayCatalog();
+                inquirer.prompt([
+                    {
+                        type: "confirm",
+                        message: "Are you finished shopping?",
+                        name: "shopAgain"
+                    }
+                ]).then(function (answer) {
+                    if (answer.shopAgain) {
+                        console.log("Thank you for shopping with us today.")
+                        connection.end();
+                    } else {
+                        displayCatalog();
+                    }
+                })
             })
         })
     });
